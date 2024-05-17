@@ -14,7 +14,8 @@ void func(int sockfd)
     char buff[MAX];
     while (strcmp(buff, "chiusura") != 0) {
         bzero(buff, sizeof(buff));
-        printf("1. inserire\n"
+        printf("Comandi disponibili:\n"
+               "1. inserire\n"
                "2. cancella\n"
                "3. stampare\n"
                "4. modifica\n"
@@ -39,12 +40,9 @@ void func(int sockfd)
         } else if (strcmp(buff, "stampare") == 0) {
             write(sockfd, buff, sizeof(buff));
             bzero(buff, sizeof(buff));
-            read(sockfd, buff, sizeof(buff));
             printf("Contatti:\n");
-            while(buff[0] != 0) {
-                printf("Contatto : %s\n", buff);
-                read(sockfd, buff, sizeof(buff));
-            }
+            read(sockfd, buff, sizeof(buff));
+            printf("%s\n", buff);
         } else if (strcmp(buff, "modifica") == 0) {
             write(sockfd, buff, sizeof(buff));
             bzero(buff, sizeof(buff));
