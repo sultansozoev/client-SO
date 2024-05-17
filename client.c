@@ -1,9 +1,7 @@
-#include <arpa/inet.h> // inet_addr()
-#include <netdb.h>
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h> // bzero()
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -14,7 +12,6 @@
 void func(int sockfd)
 {
     char buff[MAX];
-    int n;
     while (strcmp(buff, "chiusura") != 0) {
         bzero(buff, sizeof(buff));
         printf("1. inserire\n"
@@ -26,24 +23,43 @@ void func(int sockfd)
         scanf("%s", buff);
         if (strcmp(buff, "inserire") == 0) {
             write(sockfd, buff, sizeof(buff));
+            printf("Inserisci il nome : ");
+            scanf("%s", buff);
+            write(sockfd, buff, sizeof(buff));
+            printf("Inserisci il numero : ");
+            scanf("%s", buff);
+            write(sockfd, buff, sizeof(buff));
+        } else if (strcmp(buff, "cancella") == 0) {
+            write(sockfd, buff, sizeof(buff));
             bzero(buff, sizeof(buff));
             printf("Inserisci il nome : ");
             scanf("%s", buff);
             write(sockfd, buff, sizeof(buff));
             bzero(buff, sizeof(buff));
-            printf("Inserisci il numero : ");
-            scanf("%s", buff);
-            write(sockfd, buff, sizeof(buff));
-            bzero(buff, sizeof(buff));
-        } else if (strcmp(buff, "cancella") == 0) {
-
         } else if (strcmp(buff, "stampare") == 0) {
             write(sockfd, buff, sizeof(buff));
             bzero(buff, sizeof(buff));
             read(sockfd, buff, sizeof(buff));
-            printf("Contatti : %s\n", buff);
+            printf("Contatti:\n");
+            while(buff[0] != 0) {
+                printf("Contatto : %s\n", buff);
+                read(sockfd, buff, sizeof(buff));
+            }
+        } else if (strcmp(buff, "modifica") == 0) {
+            write(sockfd, buff, sizeof(buff));
+            bzero(buff, sizeof(buff));
+            printf("Inserisci il nome : ");
+            scanf("%s", buff);
+            write(sockfd, buff, sizeof(buff));
+            bzero(buff, sizeof(buff));
+            printf("Inserisci il nuovo numero : ");
+            scanf("%s", buff);
+            write(sockfd, buff, sizeof(buff));
+            bzero(buff, sizeof(buff));
+        } else if (strcmp(buff, "chiusura") == 0) {
+            write(sockfd, buff, sizeof(buff));
+            break;
         }
-
         if ((strncmp(buff, "exit", 4)) == 0) {
             printf("Client Exit...\n");
             break;
