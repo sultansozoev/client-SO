@@ -54,6 +54,12 @@ void func(int sockfd)
             scanf("%s", buff);
             write(sockfd, buff, sizeof(buff));
             bzero(buff, sizeof(buff));
+            read(sockfd, buff, sizeof(buff));
+            if (strcmp(buff, "Contatto non trovato") == 0) {
+                printf("Contatto non trovato\n");
+            } else if (strcmp(buff, "Contatto trovato") == 0) {
+                printf("Contatto trovato e modificato\n");
+            }
         } else if (strcmp(buff, "chiusura") == 0) {
             write(sockfd, buff, sizeof(buff));
             break;
