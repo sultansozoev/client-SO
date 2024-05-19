@@ -5,7 +5,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define MAX 80
+#define MAX 1024
 #define PORT 8080
 #define SA struct sockaddr
 
@@ -39,7 +39,6 @@ void func(int sockfd)
             bzero(buff, sizeof(buff));
         } else if (strcmp(buff, "stampare") == 0) {
             write(sockfd, buff, sizeof(buff));
-            bzero(buff, sizeof(buff));
             printf("Contatti:\n");
             read(sockfd, buff, sizeof(buff));
             printf("%s\n", buff);
