@@ -20,10 +20,17 @@ void func(int sockfd)
                "3. stampare\n"
                "4. modifica\n"
                "5. chiusura\n"
+               "6. registrare\n"
+               "7. accedere\n"
                "Inserisci il comando: ");
         scanf("%s", buff);
         if (strcmp(buff, "inserire") == 0) {
             write(sockfd, buff, sizeof(buff));
+            read(sockfd, buff, sizeof(buff));
+            if (strcmp(buff, "Authentication required") == 0) {
+                printf("Authentication required\n");
+                continue;
+            }
             printf("Inserisci il nome : ");
             scanf("%s", buff);
             write(sockfd, buff, sizeof(buff));
@@ -32,6 +39,11 @@ void func(int sockfd)
             write(sockfd, buff, sizeof(buff));
         } else if (strcmp(buff, "cancella") == 0) {
             write(sockfd, buff, sizeof(buff));
+            read(sockfd, buff, sizeof(buff));
+            if (strcmp(buff, "Authentication required") == 0) {
+                printf("Authentication required\n");
+                continue;
+            }
             bzero(buff, sizeof(buff));
             printf("Inserisci il nome : ");
             scanf("%s", buff);
@@ -44,6 +56,11 @@ void func(int sockfd)
             printf("%s\n", buff);
         } else if (strcmp(buff, "modifica") == 0) {
             write(sockfd, buff, sizeof(buff));
+            read(sockfd, buff, sizeof(buff));
+            if (strcmp(buff, "Authentication required") == 0) {
+                printf("Authentication required\n");
+                continue;
+            }
             bzero(buff, sizeof(buff));
             printf("Inserisci il nome : ");
             scanf("%s", buff);
@@ -58,6 +75,34 @@ void func(int sockfd)
                 printf("Contatto non trovato\n");
             } else if (strcmp(buff, "Contatto trovato") == 0) {
                 printf("Contatto trovato e modificato\n");
+            }
+        } else if (strcmp(buff, "registrare") == 0) {
+            write(sockfd, buff, sizeof(buff));
+            printf("Enter username: ");
+            scanf("%s", buff);
+            write(sockfd, buff, sizeof(buff));
+            printf("Enter password: ");
+            scanf("%s", buff);
+            write(sockfd, buff, sizeof(buff));
+            read(sockfd, buff, sizeof(buff));
+            if (strcmp(buff, "Username already exists") == 0) {
+                printf("Username already exists\n");
+            } else if (strcmp(buff, "User registered successfully") == 0) {
+                printf("User registered successfully\n");
+            }
+        } else if(strcmp(buff, "accedere") == 0) {
+            write(sockfd, buff, sizeof(buff));
+            printf("Enter username: ");
+            scanf("%s", buff);
+            write(sockfd, buff, sizeof(buff));
+            printf("Enter password: ");
+            scanf("%s", buff);
+            write(sockfd, buff, sizeof(buff));
+            read(sockfd, buff, sizeof(buff));
+            if (strcmp(buff, "User authenticated successfully") == 0) {
+                printf("User authenticated successfully\n");
+            } else if (strcmp(buff, "Authentication failed") == 0) {
+                printf("Authentication failed\n");
             }
         } else if (strcmp(buff, "chiusura") == 0) {
             write(sockfd, buff, sizeof(buff));
