@@ -34,9 +34,15 @@ void func(int sockfd)
             printf("Inserisci il nome : ");
             scanf("%s", buff);
             write(sockfd, buff, sizeof(buff));
-            printf("Inserisci il numero : ");
-            scanf("%s", buff);
-            write(sockfd, buff, sizeof(buff));
+            read(sockfd, buff, sizeof(buff));
+            if (strcmp(buff, "Contact already exists") == 0) {
+                printf("Contact already exists\n");
+                continue;
+            } else {
+                printf("Inserisci il numero : ");
+                scanf("%s", buff);
+                write(sockfd, buff, sizeof(buff));
+            }
         } else if (strcmp(buff, "cancella") == 0) {
             write(sockfd, buff, sizeof(buff));
             read(sockfd, buff, sizeof(buff));
@@ -48,7 +54,12 @@ void func(int sockfd)
             printf("Inserisci il nome : ");
             scanf("%s", buff);
             write(sockfd, buff, sizeof(buff));
-            bzero(buff, sizeof(buff));
+            read(sockfd, buff, sizeof(buff));
+            if (strcmp(buff, "Contatto non trovato") == 0) {
+                printf("Contatto non trovato\n");
+            } else if (strcmp(buff, "Contatto trovato") == 0) {
+                printf("Contatto trovato e cancellato\n");
+            }
         } else if (strcmp(buff, "stampare") == 0) {
             write(sockfd, buff, sizeof(buff));
             printf("Contatti:\n");
