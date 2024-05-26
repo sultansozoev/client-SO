@@ -3,11 +3,41 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
-void func(int sockfd)
-{
+void writeString(int connfd, const char* str) {
+    int length = (int) strlen(str);
+    if (write(connfd, &length, sizeof(length)) != sizeof(length)) {
+        perror("Failed to write length");
+    }
+    if (write(connfd, str, length) != length) {
+        perror("Failed to write string");
+    }
+}
+
+char* readString(int connfd) {
+    int length;
+    if (read(connfd, &length, sizeof(length)) != sizeof(length)) {
+        perror("Failed to read length");
+        return NULL;
+    }
+    char* buffer = (char*)malloc(length + 1);
+    if (buffer == NULL) {
+        perror("Failed to allocate memory");
+        return NULL;
+    }
+    if (read(connfd, buffer, length) != length) {
+        perror("Failed to read string");
+        free(buffer);
+        return NULL;
+    }
+    buffer[length] = '\0';
+    return buffer;
+}
+
+void func(int sockfd) {
     char buff[MAX];
-    while (strcmp(buff, "close") != 0) {
+    while (1) {
         bzero(buff, sizeof(buff));
         printf("Commands:\n"
                "1. login\n"
@@ -19,104 +49,142 @@ void func(int sockfd)
                "7. close\n"
                "Enter the command: ");
         scanf("%s", buff);
+        writeString(sockfd, buff);
+
         if (strcmp(buff, "add") == 0) {
-            write(sockfd, buff, sizeof(buff));
-            read(sockfd, buff, sizeof(buff));
-            if (strcmp(buff, "Authentication required") == 0) {
-                printf("Authentication required\n");
+            char* response = readString(sockfd);
+            if (response == NULL) {
                 continue;
             }
+            if (strcmp(response, "Authentication required") == 0) {
+                printf("Authentication required\n");
+                free(response);
+                continue;
+            }
+            free(response);
+
             printf("Enter name: ");
             scanf("%s", buff);
-            write(sockfd, buff, sizeof(buff));
-            read(sockfd, buff, sizeof(buff));
-            if (strcmp(buff, "Contact already exists") == 0) {
-                printf("Contact already exists\n");
+            writeString(sockfd, buff);
+
+            response = readString(sockfd);
+            if (response == NULL) {
                 continue;
+            }
+            if (strcmp(response, "Contact already exists") == 0) {
+                printf("Contact already exists\n");
+                free(response);
             } else {
-                printf("Enter number : ");
+                free(response);
+                printf("Enter number: ");
                 scanf("%s", buff);
-                write(sockfd, buff, sizeof(buff));
+                writeString(sockfd, buff);
             }
         } else if (strcmp(buff, "delete") == 0) {
-            write(sockfd, buff, sizeof(buff));
-            read(sockfd, buff, sizeof(buff));
-            if (strcmp(buff, "Authentication required") == 0) {
-                printf("Authentication required\n");
+            char* response = readString(sockfd);
+            if (response == NULL) {
                 continue;
             }
+            if (strcmp(response, "Authentication required") == 0) {
+                printf("Authentication required\n");
+                free(response);
+                continue;
+            }
+            free(response);
+
             bzero(buff, sizeof(buff));
             printf("Enter name: ");
             scanf("%s", buff);
-            write(sockfd, buff, sizeof(buff));
-            read(sockfd, buff, sizeof(buff));
-            if (strcmp(buff, "Contact not found") == 0) {
+            writeString(sockfd, buff);
+
+            response = readString(sockfd);
+            if (response == NULL) {
+                continue;
+            }
+            if (strcmp(response, "Contact not found") == 0) {
                 printf("Contact not found\n");
-            } else if (strcmp(buff, "Contact deleted") == 0) {
+            } else if (strcmp(response, "Contact deleted") == 0) {
                 printf("Contact deleted\n");
             }
+            free(response);
         } else if (strcmp(buff, "print") == 0) {
-            write(sockfd, buff, sizeof(buff));
-            printf("Contacts:\n");
-            read(sockfd, buff, sizeof(buff));
-            printf("%s\n", buff);
+            char* contacts = readString(sockfd);
+            if (contacts != NULL) {
+                printf("Contacts:\n%s\n", contacts);
+                free(contacts);
+            }
         } else if (strcmp(buff, "modify") == 0) {
-            write(sockfd, buff, sizeof(buff));
-            read(sockfd, buff, sizeof(buff));
-            if (strcmp(buff, "Authentication required") == 0) {
-                printf("Authentication required\n");
+            char* response = readString(sockfd);
+            if (response == NULL) {
                 continue;
             }
+            if (strcmp(response, "Authentication required") == 0) {
+                printf("Authentication required\n");
+                free(response);
+                continue;
+            }
+            free(response);
+
             bzero(buff, sizeof(buff));
             printf("Enter name: ");
             scanf("%s", buff);
-            write(sockfd, buff, sizeof(buff));
+            writeString(sockfd, buff);
+
             bzero(buff, sizeof(buff));
             printf("Enter new number: ");
             scanf("%s", buff);
-            write(sockfd, buff, sizeof(buff));
-            bzero(buff, sizeof(buff));
-            read(sockfd, buff, sizeof(buff));
-            if (strcmp(buff, "Contact not found") == 0) {
+            writeString(sockfd, buff);
+
+            response = readString(sockfd);
+            if (response == NULL) {
+                continue;
+            }
+            if (strcmp(response, "Contact not found") == 0) {
                 printf("Contact not found\n");
-            } else if (strcmp(buff, "Contact modified") == 0) {
+            } else if (strcmp(response, "Contact modified") == 0) {
                 printf("Contact modified\n");
             }
+            free(response);
         } else if (strcmp(buff, "register") == 0) {
-            write(sockfd, buff, sizeof(buff));
             printf("Enter username: ");
             scanf("%s", buff);
-            write(sockfd, buff, sizeof(buff));
+            writeString(sockfd, buff);
+
             printf("Enter password: ");
             scanf("%s", buff);
-            write(sockfd, buff, sizeof(buff));
-            read(sockfd, buff, sizeof(buff));
-            if (strcmp(buff, "Username already exists") == 0) {
-                printf("Username already exists\n");
-            } else if (strcmp(buff, "User registered successfully") == 0) {
-                printf("User registered successfully\n");
+            writeString(sockfd, buff);
+
+            char* response = readString(sockfd);
+            if (response != NULL) {
+                if (strcmp(response, "Username already exists") == 0) {
+                    printf("Username already exists\n");
+                } else if (strcmp(response, "User registered successfully") == 0) {
+                    printf("User registered successfully\n");
+                }
+                free(response);
             }
-        } else if(strcmp(buff, "login") == 0) {
-            write(sockfd, buff, sizeof(buff));
+        } else if (strcmp(buff, "login") == 0) {
             printf("Enter username: ");
             scanf("%s", buff);
-            write(sockfd, buff, sizeof(buff));
+            writeString(sockfd, buff);
+
             printf("Enter password: ");
             scanf("%s", buff);
-            write(sockfd, buff, sizeof(buff));
-            read(sockfd, buff, sizeof(buff));
-            if (strcmp(buff, "User authenticated successfully") == 0) {
-                printf("User authenticated successfully\n");
-            } else if (strcmp(buff, "Authentication failed") == 0) {
-                printf("Authentication failed\n");
+            writeString(sockfd, buff);
+
+            char* response = readString(sockfd);
+            if (response != NULL) {
+                if (strcmp(response, "User authenticated successfully") == 0) {
+                    printf("User authenticated successfully\n");
+                } else if (strcmp(response, "Authentication failed") == 0) {
+                    printf("Authentication failed\n");
+                }
+                free(response);
             }
         } else if (strcmp(buff, "close") == 0) {
-            write(sockfd, buff, sizeof(buff));
-            break;
-        }
-        if ((strncmp(buff, "exit", 4)) == 0) {
-            printf("Client Exit...\n");
+            writeString(sockfd, buff);
             break;
         }
     }
+    printf("Client Exit...\n");
 }
