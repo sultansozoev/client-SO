@@ -1,37 +1,32 @@
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
+#include "../include/commands.h"
 
-#define MAX 1024
-#define PORT 8080
-#define SA struct sockaddr
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 void func(int sockfd)
 {
     char buff[MAX];
-    while (strcmp(buff, "chiusura") != 0) {
+    while (strcmp(buff, "close") != 0) {
         bzero(buff, sizeof(buff));
-        printf("Comandi disponibili:\n"
-               "1. inserire\n"
-               "2. cancella\n"
-               "3. stampare\n"
-               "4. modifica\n"
-               "5. chiusura\n"
-               "6. registrare\n"
-               "7. accedere\n"
-               "Inserisci il comando: ");
+        printf("Commands:\n"
+               "1. login\n"
+               "2. register\n"
+               "3. add\n"
+               "4. modify\n"
+               "5. delete\n"
+               "6. print\n"
+               "7. close\n"
+               "Enter the command: ");
         scanf("%s", buff);
-        if (strcmp(buff, "inserire") == 0) {
+        if (strcmp(buff, "add") == 0) {
             write(sockfd, buff, sizeof(buff));
             read(sockfd, buff, sizeof(buff));
             if (strcmp(buff, "Authentication required") == 0) {
                 printf("Authentication required\n");
                 continue;
             }
-            printf("Inserisci il nome : ");
+            printf("Enter name: ");
             scanf("%s", buff);
             write(sockfd, buff, sizeof(buff));
             read(sockfd, buff, sizeof(buff));
@@ -39,11 +34,11 @@ void func(int sockfd)
                 printf("Contact already exists\n");
                 continue;
             } else {
-                printf("Inserisci il numero : ");
+                printf("Enter number : ");
                 scanf("%s", buff);
                 write(sockfd, buff, sizeof(buff));
             }
-        } else if (strcmp(buff, "cancella") == 0) {
+        } else if (strcmp(buff, "delete") == 0) {
             write(sockfd, buff, sizeof(buff));
             read(sockfd, buff, sizeof(buff));
             if (strcmp(buff, "Authentication required") == 0) {
@@ -51,21 +46,21 @@ void func(int sockfd)
                 continue;
             }
             bzero(buff, sizeof(buff));
-            printf("Inserisci il nome : ");
+            printf("Enter name: ");
             scanf("%s", buff);
             write(sockfd, buff, sizeof(buff));
             read(sockfd, buff, sizeof(buff));
-            if (strcmp(buff, "Contatto non trovato") == 0) {
-                printf("Contatto non trovato\n");
-            } else if (strcmp(buff, "Contatto trovato") == 0) {
-                printf("Contatto trovato e cancellato\n");
+            if (strcmp(buff, "Contact not found") == 0) {
+                printf("Contact not found\n");
+            } else if (strcmp(buff, "Contact deleted") == 0) {
+                printf("Contact deleted\n");
             }
-        } else if (strcmp(buff, "stampare") == 0) {
+        } else if (strcmp(buff, "print") == 0) {
             write(sockfd, buff, sizeof(buff));
-            printf("Contatti:\n");
+            printf("Contacts:\n");
             read(sockfd, buff, sizeof(buff));
             printf("%s\n", buff);
-        } else if (strcmp(buff, "modifica") == 0) {
+        } else if (strcmp(buff, "modify") == 0) {
             write(sockfd, buff, sizeof(buff));
             read(sockfd, buff, sizeof(buff));
             if (strcmp(buff, "Authentication required") == 0) {
@@ -73,21 +68,21 @@ void func(int sockfd)
                 continue;
             }
             bzero(buff, sizeof(buff));
-            printf("Inserisci il nome : ");
+            printf("Enter name: ");
             scanf("%s", buff);
             write(sockfd, buff, sizeof(buff));
             bzero(buff, sizeof(buff));
-            printf("Inserisci il nuovo numero : ");
+            printf("Enter new number: ");
             scanf("%s", buff);
             write(sockfd, buff, sizeof(buff));
             bzero(buff, sizeof(buff));
             read(sockfd, buff, sizeof(buff));
-            if (strcmp(buff, "Contatto non trovato") == 0) {
-                printf("Contatto non trovato\n");
-            } else if (strcmp(buff, "Contatto trovato") == 0) {
-                printf("Contatto trovato e modificato\n");
+            if (strcmp(buff, "Contact not found") == 0) {
+                printf("Contact not found\n");
+            } else if (strcmp(buff, "Contact modified") == 0) {
+                printf("Contact modified\n");
             }
-        } else if (strcmp(buff, "registrare") == 0) {
+        } else if (strcmp(buff, "register") == 0) {
             write(sockfd, buff, sizeof(buff));
             printf("Enter username: ");
             scanf("%s", buff);
@@ -101,7 +96,7 @@ void func(int sockfd)
             } else if (strcmp(buff, "User registered successfully") == 0) {
                 printf("User registered successfully\n");
             }
-        } else if(strcmp(buff, "accedere") == 0) {
+        } else if(strcmp(buff, "login") == 0) {
             write(sockfd, buff, sizeof(buff));
             printf("Enter username: ");
             scanf("%s", buff);
@@ -115,7 +110,7 @@ void func(int sockfd)
             } else if (strcmp(buff, "Authentication failed") == 0) {
                 printf("Authentication failed\n");
             }
-        } else if (strcmp(buff, "chiusura") == 0) {
+        } else if (strcmp(buff, "close") == 0) {
             write(sockfd, buff, sizeof(buff));
             break;
         }
@@ -124,34 +119,4 @@ void func(int sockfd)
             break;
         }
     }
-}
-
-int main()
-{
-    int sockfd;
-    struct sockaddr_in servaddr;
-
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1) {
-        printf("socket creation failed...\n");
-        exit(0);
-    }
-    else
-        printf("Socket successfully created..\n");
-    bzero(&servaddr, sizeof(servaddr));
-
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    servaddr.sin_port = htons(PORT);
-
-    if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr))
-        != 0) {
-        printf("connection with the server failed...\n");
-        exit(0);
-    }
-    else
-        printf("connected to the server..\n");
-
-    func(sockfd);
-    close(sockfd);
 }
